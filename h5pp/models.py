@@ -102,10 +102,10 @@ class h5p_contents(models.Model):
         help_text='Identifier of the content')
     title = models.CharField(null=False, max_length=255)
     json_contents = models.TextField(null=False,
-        help_text='The content in JSON format')
-    embed_type = models.CharField(null=False, default='', max_length=127)
-    disable = models.PositiveIntegerField(null=False, default=0)
-    main_library_id = models.PositiveIntegerField(null=False,
+        default='Content was not created properly', help_text='The content in JSON format')
+    embed_type = models.CharField(null=True, default='', max_length=127)
+    disable = models.PositiveIntegerField(null=True, default=0)
+    main_library_id = models.PositiveIntegerField(null=True,
         help_text='The library we first instanciate for this content')
     content_type = models.CharField(null=True, max_length=127,
         help_text='Content type as defined in h5p.json')
@@ -117,6 +117,11 @@ class h5p_contents(models.Model):
         help_text='Filtered version of json_contents')
     slug = models.CharField(null=False, max_length=127,
         help_text='Human readable content identifier that is unique')
+    community_id = models.PositiveIntegerField(null=True,
+        help_text='The community to which the content belongs')
+    group_id = models.PositiveIntegerField(null=True, default=0,
+        help_text='The name of the community')
+    
 
     class Meta:
         db_table = 'h5p_contents'

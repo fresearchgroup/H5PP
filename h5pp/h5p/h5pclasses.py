@@ -369,6 +369,8 @@ class H5PDjango:
         update.filtered = ''
         update.disable = content['disable']
         update.slug = slugify(content['title'])
+        update.community_id = content['community_id']
+        update.group_id = content['group_id']
         update.save()
 
         # Derive library data from string
@@ -390,15 +392,18 @@ class H5PDjango:
     def insertContent(self, content, contentMainId=None):
         # Insert
         result = h5p_contents.objects.create(
-            title=content['title'],
-            json_contents=content['params'],
+            title=content['title'] if 'title' in content else '',
+            json_contents=content['params'] if 'params' in content else '',
             embed_type='div',
             content_type=content['library']['machineName'],
             main_library_id=content['library']['libraryId'],
-            author=content['author'],
-            disable=content['disable'],
+            author=content['author'] if 'author' in content else '',
+            disable=content['disable'] if 'disable' in content else '',
             filtered='',
-            slug=slugify(content['title']))
+            slug=slugify(content['title']),
+            community_id = content['community_id'] if 'community_id' in content else '',
+            group_id = content['group_id'] if 'group_id' in content else ''
+            )
 
         event = H5PEvent('content', 'create', result.content_id, content['title'] if 'title' in content else '', content[
                          'library']['machineName'], str(content['library']['majorVersion']) + '.' + str(content['library']['minorVersion']))
@@ -554,6 +559,8 @@ class H5PDjango:
 					hn.embed_type,
                     hn.content_type,
                     hn.author,
+                    hn.community_id,
+                    hn.group_id,
 					hl.library_id,
 					hl.machine_name AS library_name,
 					hl.major_version AS library_major_version,

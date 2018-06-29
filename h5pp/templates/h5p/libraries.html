@@ -3,11 +3,11 @@
 {% block head %}
 	<title>H5PP - Libraries</title>
 	<style>
-		{% if not libraries %}
+		/*{% if not libraries %}
 		.configuration {
 			display: none;
 		}
-		{% endif %}
+		{% endif %}*/
 	</style>
 	<script>
 		window.onload = function() {
@@ -56,7 +56,7 @@
 		};
 	</script>
 {% endblock head %}
-{% block body %}
+{% block content %}
 <div class="wrap">
 	<h1 class="page-title">Libraries</h3>
 	<div class="well upload">
@@ -123,4 +123,4 @@
 	{% endif %}
 </div>
 <br>
-{% endblock body %}
+{% endblock content %}
