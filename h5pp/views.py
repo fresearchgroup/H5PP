@@ -11,6 +11,7 @@ from h5pp.h5p.h5pclasses import H5PDjango
 from h5pp.h5p.editor.h5peditormodule import h5peditorContent, handleContentUserData
 from h5pp.h5p.editor.h5peditorclasses import H5PDjangoEditor
 from h5pp.h5p.editor.library.h5peditorfile import H5PEditorFile
+from django.conf import settings
 
 
 def home(request):
@@ -44,14 +45,34 @@ def createView(request, contentId=None):
         if request.method == 'POST':
             if contentId != None:
                 request.POST['contentId'] = contentId
+                from django.db import connection
+                cursor = connection.cursor()
+                cursor.execute("select community_id from h5p_contents where content_id = %s", [contentId])
+                cid = cursor.fetchone()[0] 
+                cursor.execute("select group_id from h5p_contents where content_id = %s", [contentId])
+                gid = cursor.fetchone()[0]
+                request.POST['community_id'] = cid
+                request.POST['group_id'] = gid
+            else:
+                request.POST['community_id'] = request.session['cid'] 
+                cid = request.POST['community_id']
+                request.POST['group_id'] = request.session['gid']
+                gid = request.session['gid']
+                del request.session['cid']
+                del request.session['gid']
             form = CreateForm(request, request.POST, request.FILES)
             if form.is_valid():
                 if contentId != None:
-                    return HttpResponseRedirect('/h5p/content/?contentId=' + contentId)
+                    if cid != 0:
+                        return HttpResponseRedirect( settings.COLLAB_ROOT + '/community_content/' + str(cid))
+                    else:
+                        return HttpResponseRedirect( settings.COLLAB_ROOT + '/group_content/' + str(gid))
                 else:
-                    newId = h5p_contents.objects.all(
-                    ).order_by('-content_id')[0]
-                    return HttpResponseRedirect('/h5p/content/?contentId=' + str(newId.content_id))
+                    newId = h5p_contents.objects.all().order_by('-content_id')[0]
+                    if cid != 0:
+                        return HttpResponseRedirect( settings.COLLAB_ROOT + '/community_content/' + str(cid))
+                    else:
+                        return HttpResponseRedirect( settings.COLLAB_ROOT + '/group_content/' + str(gid))
             return render(request, 'h5p/create.html', {'form': form, 'data': editor})
 
         elif contentId != None:
@@ -60,9 +81,11 @@ def createView(request, contentId=None):
             request.GET = request.GET.copy()
             request.GET['contentId'] = contentId
             request.GET['json_content'] = edit['params']
+            request.GET['content_type'] = edit['content_type']
             request.GET['h5p_library'] = edit['library_name'] + ' ' + \
                 str(edit['library_major_version']) + '.' + \
                 str(edit['library_minor_version'])
+            print('Thefnwfkwfnlknfwknlnkllnk')
 
         form = CreateForm(request)
 

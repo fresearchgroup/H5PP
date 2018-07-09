@@ -87,8 +87,10 @@ CHOICES = [('upload', 'Upload'),
 class CreateForm(forms.Form):
     title = forms.CharField(label='Title ')
     h5p_type = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
-    h5p = forms.FileField(label='HTML 5 Package ', help_text='Select a .h5p file to upload and create interactive content from. You may start with the <a href="http://h5p.org/content-types-and-applications" target="_blank">example files</a> on H5P.org', required=False)
+    h5p = forms.FileField(label='HTML 5 Package ', required=False)
     json_content = forms.CharField(widget=forms.HiddenInput())
+    community_id = forms.IntegerField(widget=forms.HiddenInput())
+    group_id = forms.IntegerField(widget=forms.HiddenInput())
     disable = forms.IntegerField(widget=forms.HiddenInput())
     h5p_library = forms.CharField(widget=forms.HiddenInput())
 
@@ -99,6 +101,8 @@ class CreateForm(forms.Form):
         self.fields['json_content'].initial = self.getJsonContent()
         self.fields['disable'].initial = self.getDisable()
         self.fields['h5p_library'].initial = self.getLibrary()
+        self.fields['community_id'].initial = self.getCommunity_id()
+        self.fields['group_id'].initial = self.getgroup_id()
 
     def clean(self):
         if self.request.POST['h5p_type'] == 'upload':
@@ -143,6 +147,8 @@ class CreateForm(forms.Form):
                     raise forms.ValidationError('No such library')
 
                 content['title'] = self.request.POST['title']
+                content['community_id'] = self.request.POST['community_id']
+                content['group_id'] = self.request.POST['group_id']
                 content['params'] = self.request.POST['json_content']
                 content['author'] = self.request.user.username
                 params = json.loads(content['params'])
@@ -155,8 +161,7 @@ class CreateForm(forms.Form):
                         'Impossible to create the content')
 
                 return content['id']
-
-        return self.cleaned_data
+        return self.cleaned_data    
 
     def getJsonContent(self):
         if 'json_content' in self.request.GET or 'translation_source' in self.request.GET and 'json_content' in self.request.GET['translation_source']:
@@ -182,5 +187,15 @@ class CreateForm(forms.Form):
     def getTitle(self):
         if 'title' in self.request.GET:
             return self.request.GET['title']
+        else:
+            return ''
+    def getCommunity_id(self):
+        if 'community_id' in self.request.GET:
+            return self.request.GET['community_id']
+        else:
+            return ''
+    def getgroup_id(self):
+        if 'group_id' in self.request.GET:
+            return self.request.GET['group_id']
         else:
             return ''
